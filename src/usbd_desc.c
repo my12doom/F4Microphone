@@ -32,6 +32,7 @@
 #include "usbd_req.h"
 #include "usbd_conf.h"
 #include "usb_regs.h"
+#include "crc32.h"
 
 /** @addtogroup STM32_USB_OTG_DEVICE_LIBRARY
   * @{
@@ -257,14 +258,14 @@ uint8_t *  USBD_USR_ManufacturerStrDescriptor( uint8_t speed , uint16_t *length)
 */
 uint8_t *  USBD_USR_SerialStrDescriptor( uint8_t speed , uint16_t *length)
 {
-  if(speed  == USB_OTG_SPEED_HIGH)
-  {    
-    USBD_GetString (USBD_SERIALNUMBER_HS_STRING, USBD_StrDesc, length);
-  }
-  else
-  {
-    USBD_GetString (USBD_SERIALNUMBER_FS_STRING, USBD_StrDesc, length);    
-  }
+	const void *stm32_id_address = (const void*)0x1FFF7A10;
+	char data[12];
+	memcpy(data, stm32_id_address, 12);
+	unsigned int crc = crc32(0, data, 12);
+	sprintf(data, "%08x", crc);
+	
+    USBD_GetString (data, USBD_StrDesc, length);
+	
   return USBD_StrDesc;
 }
 

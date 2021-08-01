@@ -1,4 +1,5 @@
 #include "usbd_audio_core.h"
+#include <stdint.h> 
 #include "i2s.h"
 
 /*********************************************
@@ -171,11 +172,11 @@ static uint8_t usbd_audio_CfgDesc[AUDIO_CONFIG_DESC_SIZE] =
     AUDIO_INTERFACE_DESCRIPTOR_TYPE,// CS_INTERFACE Descriptor Type (bDescriptorType) 0x24
     AUDIO_STREAMING_FORMAT_TYPE,   // FORMAT_TYPE subtype. (bDescriptorSubtype) 0x02
     0x01,                        // FORMAT_TYPE_I. (bFormatType)
-    USBD_IN_AUDIO_CH,            // One channel.(bNrChannels)
-    0x02,                        // Two bytes per audio subframe.(bSubFrameSize)
-    0x10,                        // 16 bits per sample.(bBitResolution)
+    AUDIO_CHANNEL,            // One channel.(bNrChannels)
+    AUDIO_RES/8,                        // Two bytes per audio subframe.(bSubFrameSize)
+    AUDIO_RES,                        // 16 bits per sample.(bBitResolution)
     0x01,                        // One frequency supported. (bSamFreqType)
-    (USBD_IN_AUDIO_FREQ&0xFF),((USBD_IN_AUDIO_FREQ>>8)&0xFF),((USBD_IN_AUDIO_FREQ>>16)&0xFF),  // (tSamFreq)
+    (AUDIO_SAMPLE_RATE&0xFF),((AUDIO_SAMPLE_RATE>>8)&0xFF),((AUDIO_SAMPLE_RATE>>16)&0xFF),  // (tSamFreq)
 
     /*  USB Microphone Standard Endpoint Descriptor (CODE == 8)*/ //Standard AS Isochronous Audio Data Endpoint Descriptor
     0x09,                       // Size of the descriptor, in bytes (bLength)
@@ -197,7 +198,7 @@ static uint8_t usbd_audio_CfgDesc[AUDIO_CONFIG_DESC_SIZE] =
     0x00,                       // Unused. (bRefresh)
     0x00,                       // Unused. (bSynchAddress)
 
-    /* USB Microphone Class-specific Isoc. Audio Data Endpoint Descriptor (CODE == 7) OK - подтверждено документацией*/
+    /* USB Microphone Class-specific Isoc. Audio Data Endpoint Descriptor (CODE == 7) */
     0x07,                       // Size of the descriptor, in bytes (bLength)
     AUDIO_ENDPOINT_DESCRIPTOR_TYPE,    // CS_ENDPOINT Descriptor Type (bDescriptorType) 0x25
     AUDIO_ENDPOINT_GENERAL,            // GENERAL subtype. (bDescriptorSubtype) 0x01
@@ -207,13 +208,6 @@ static uint8_t usbd_audio_CfgDesc[AUDIO_CONFIG_DESC_SIZE] =
 };
 
 
-/**
-* @brief  usbd_audio_Init
-*         Initilaizes the AUDIO interface.
-* @param  pdev: device instance
-* @param  cfgidx: Configuration index
-* @retval status
-*/
 static uint8_t  usbd_audio_Init (void  *pdev, 
                                  uint8_t cfgidx)
 {  
@@ -290,7 +284,7 @@ static uint8_t  usbd_audio_Setup (void  *pdev,
  		*p = 0x10;
 		USBD_CtlSendData (pdev, buf, req->wLength);
 		break;
-   case AUDIO_REQ_GET_CUR: //запрос состояния mute
+   case AUDIO_REQ_GET_CUR: //запрос сост?ния mute
 		AUDIO_Req_GetCurrent(pdev, req);
 		break;
       
@@ -338,8 +332,8 @@ static uint8_t  usbd_audio_Setup (void  *pdev,
 		else 
 		{ 
         	PlayFlag = 0;
-        	DCD_EP_Flush (pdev,AUDIO_IN_EP);
         }
+		//DCD_EP_Flush (pdev,AUDIO_IN_EP);
       }
       else
       {
@@ -482,7 +476,7 @@ static uint8_t  usbd_audio_SOF (void *pdev)
 	// Check if there are available data in stream buffer.
 	if (PlayFlag == 1) {
 
-		DCD_EP_Tx (pdev,AUDIO_IN_EP, NULL, AUDIO_IN_PACKET);
+		DCD_EP_Tx (pdev,AUDIO_IN_EP, tx_buf, AUDIO_IN_PACKET);
 		PlayFlag = 2;
 	}
 
@@ -516,7 +510,7 @@ static void AUDIO_Req_GetCurrent(void *pdev, USB_SETUP_REQ *req)
 	if (req->wLength == 1)
 		USBD_CtlSendData (pdev, &muted, req->wLength);
 	else if (req->wLength == 2)
-		USBD_CtlSendData (pdev, &volume, req->wLength);
+		USBD_CtlSendData (pdev, (uint8_t*)&volume, req->wLength);
 	else
 		USBD_CtlError (pdev, req);
 }

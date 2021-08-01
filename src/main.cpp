@@ -6,24 +6,28 @@ extern "C" {
 #include "F4GPIO.h"
 #include "F4SysTimer.h"
 #include "II2C.h"
+#include <math.h>
+
 
 using namespace HAL;
 using namespace STM32F4;
 
 extern "C" void SetSysClock();
-int default_download_IC_1();
+int default_download_IC_1(bool _24bit);
 int set_volume(uint8_t gain_code, bool muted = false);	// 0.75db/LSB
 
 
 volatile int16_t volume = 0x3f00;
 volatile uint8_t muted = 0;
 volatile int volume_changed = 0;
-volatile int channel = 2;
+volatile int channel = 0;
 __ALIGN_BEGIN USB_OTG_CORE_HANDLE  USB_OTG_dev __ALIGN_END;
 F4GPIO scl(GPIOC, GPIO_Pin_13);
 F4GPIO sda(GPIOC, GPIO_Pin_14);
 I2C_SW i2c(&scl, &sda);
 
+	int t;
+	int32_t v[48];
 
 int main(void)
 {	
@@ -53,17 +57,26 @@ int main(void)
 	else
 		led1.write(0);
 #endif
-
-
-	i2c.set_speed(20);
-	for(int i=0; i<3; i++)
-	if (default_download_IC_1()<0)
-		NVIC_SystemReset();
-	i2s_setup();
+	systimer->delayms(10);
 
 	F4GPIO led2(GPIOB, GPIO_Pin_15);
-	led2.write(0);
+	led2.write(1);
 	led2.set_mode(MODE_OUT_PushPull);
+
+	systimer->delayms(100);
+	i2s_setup();
+	i2c.set_speed(20);
+	for(int i=0; i<3; i++)
+	if (default_download_IC_1(AUDIO_RES==24)<0)
+		NVIC_SystemReset();
+	
+	
+	if (i2s_check()<0)
+		NVIC_SystemReset();
+		
+
+
+	led2.write(0);
 
 	F4GPIO button(GPIOB, GPIO_Pin_14);
 	button.set_mode(MODE_IN);
@@ -75,6 +88,15 @@ int main(void)
 			&AUDIO_cb, 
 			&USR_cb);
 
+	
+	float PI = acos(-1.0);
+	t = systimer->gettime();
+	for(int i=0; i<48; i++)
+	{
+		v[i] = 32767 * sin(i*2*PI*0.01f);
+	}
+	
+	t = systimer->gettime() - t;
 
 
 	while(1)

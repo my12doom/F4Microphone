@@ -1,7 +1,7 @@
 /*
  * File:           defines.h
  *
- * Created:        Thursday, April 02, 2020 8:36:44 PM
+ * Created:        Wednesday, October 28, 2020 12:20:30 AM
  * Description:    adau1761_mic IC default download data definitions.
  *
  * This software is distributed in the hope that it will be useful,

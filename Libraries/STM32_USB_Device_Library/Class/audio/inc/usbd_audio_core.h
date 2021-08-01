@@ -46,8 +46,7 @@
   */ 
 
 /* AudioFreq * DataSize (2 bytes) * NumChannels (Stereo: 2) */
-#define AUDIO_OUT_PACKET                              (uint32_t)(((USBD_AUDIO_FREQ * 2 * 2) /1000)) 
-#define AUDIO_IN_PACKET                               (uint32_t)(((USBD_IN_AUDIO_FREQ * 2 * USBD_IN_AUDIO_CH) /1000) + 64) //48000 -> 96
+#define AUDIO_IN_PACKET                               (uint32_t)(((AUDIO_SAMPLE_RATE * AUDIO_RES/8 * AUDIO_CHANNEL) /1000)+24)
 
 
 #define AUDIO_CONFIG_DESC_SIZE                        (118+7+9)
@@ -84,7 +83,7 @@
 #define AUDIO_FORMAT_TYPE_I                           0x01
 #define AUDIO_FORMAT_TYPE_III                         0x03
 
-#define USB_ENDPOINT_TYPE_ISOCHRONOUS                 0x05//00 = No Synchronization
+#define USB_ENDPOINT_TYPE_ISOCHRONOUS                 0x05
 #define AUDIO_ENDPOINT_GENERAL                        0x01
 #define USB_ENDPOINT_TYPE_asynchronous                0x05
 
@@ -119,21 +118,6 @@ typedef struct _Audio_Fops
   * @}
   */ 
 
-
-
-/** @defgroup USBD_CORE_Exported_Macros
-  * @{
-  */ 
-#define AUDIO_PACKET_SZE(frq)          (uint8_t)(((frq * 2 * 2)/1000) & 0xFF), \
-                                       (uint8_t)((((frq * 2 * 2)/1000) >> 8) & 0xFF)
-#define SAMPLE_FREQ(frq)               (uint8_t)(frq), (uint8_t)((frq >> 8)), (uint8_t)((frq >> 16))
-/**
-  * @}
-  */ 
-
-/** @defgroup USBD_CORE_Exported_Variables
-  * @{
-  */ 
 
 extern USBD_Class_cb_TypeDef  AUDIO_cb;
 

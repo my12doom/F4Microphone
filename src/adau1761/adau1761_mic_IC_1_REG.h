@@ -1,7 +1,7 @@
 /*
  * File:           C:\Users\my12doom\Desktop\STM32F4_USB_MICROPHONE-master\src\adau1761\adau1761_mic_IC_1_REG.h
  *
- * Created:        Thursday, April 02, 2020 8:36:44 PM
+ * Created:        Wednesday, October 28, 2020 12:20:30 AM
  * Description:    adau1761_mic:IC 1 control register definitions.
  *
  * This software is distributed in the hope that it will be useful,
@@ -984,12 +984,12 @@
 #define R64_GPIO_3_ENABLE_IC_1_SHIFT              3
 
 /* DSP Enable Register (IC 1) */
-#define R65_DSP_ENABLE_IC_1                       0x0    /* 0b	[0] */
+#define R65_DSP_ENABLE_IC_1                       0x1    /* 1b	[0] */
 #define R65_DSP_ENABLE_IC_1_MASK                  0x1
 #define R65_DSP_ENABLE_IC_1_SHIFT                 0
 
 /* DSP Run Register (IC 1) */
-#define R66_DSP_RUN_IC_1                          0x0    /* 0b	[0] */
+#define R66_DSP_RUN_IC_1                          0x1    /* 1b	[0] */
 #define R66_DSP_RUN_IC_1_MASK                     0x1
 #define R66_DSP_RUN_IC_1_SHIFT                    0
 

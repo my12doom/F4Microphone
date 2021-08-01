@@ -59,6 +59,11 @@ public:
 	{
 		return buffer_size - count() - 1;
 	}
+	
+	void reset()
+	{
+		start = end = 0;
+	}
 
 protected:
 	uint8_t buffer[buffer_size];
